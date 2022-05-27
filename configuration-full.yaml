@@ -1,0 +1,82 @@
+esphome:
+  name: !secret team-name
+
+esp32:
+  board: nodemcu-32s # or az-delivery-devkit-v4 for boards where the antenna is sticking out https://esphome.io/devices/nodemcu_esp32.html
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi:
+  ssid: "dcs-iot"
+  password: !secret wifi-password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Group-Name Fallback Hotspot"
+    password: !secret wifi-password
+
+captive_portal:
+
+sensor:
+  - platform: esp32_hall
+    name: "Hall Effect Sensor"
+    update_interval: 60s
+  # Thermometer
+  - platform: dht
+    pin: GPIO19
+    model: DHT11
+    temperature:
+      name: "Maerchenwelten Temperatur"
+      on_value_range:
+        - above: 22.0
+          then:
+            - logger.log: "Waaarm"
+            - light.turn_on:
+                id: status_led
+                transition_length: 0.5s
+                red: 0.8
+                green: 1.0
+                blue: 1.0
+        - below: 20.0
+          then:
+            - logger.log: "Cooold"
+            - light.turn_on:
+                id: status_led
+                transition_length: 0.5s
+                red: 0
+                green: 0
+                blue: 1.0
+    humidity:
+      name: "Maerchenwelten Luftfeuchtigkeit"
+    update_interval: 30s
+
+light:
+  - platform: rgb
+    id: status_led
+    name: "Status light"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: ALWAYS_ON
+
+# Example output entry
+output:
+  - platform: ledc
+    id: output_red
+    pin: GPIO15
+  - platform: ledc
+    id: output_green
+    pin: GPIO2
+  - platform: ledc
+    id: output_blue
+    pin: GPIO4
