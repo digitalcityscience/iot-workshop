@@ -1,0 +1,54 @@
+esphome:
+  name: !secret team-name
+
+esp32:
+  board: nodemcu-32s # or az-delivery-devkit-v4 for boards where the antenna is sticking out https://esphome.io/devices/nodemcu_esp32.html
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi:
+  ssid: "dcs-iot"
+  password: !secret wifi-password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Group-Name Fallback Hotspot"
+    password: !secret wifi-password
+
+captive_portal:
+
+sensor:
+  - platform: esp32_hall
+    name: "Hall Effect Sensor"
+    update_interval: 60s
+
+light:
+  - platform: rgb
+    id: status_led
+    name: "Living Room Lights"
+    red: output_red
+    green: output_green
+    blue: output_blue
+    restore_mode: ALWAYS_ON
+
+# Example output entry
+output:
+  - platform: ledc
+    id: output_red
+    pin: GPIO15
+  - platform: ledc
+    id: output_green
+    pin: GPIO2
+  - platform: ledc
+    id: output_blue
+    pin: GPIO0
